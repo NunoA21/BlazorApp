@@ -1,0 +1,64 @@
+﻿@page "/todo"
+
+<h1>Todo (@todos.Count(todo => !todo.IsDone))</h1>
+
+<ul>
+    @foreach (var todo in todos)
+    {
+        <li>
+            <input type="checkbox" @bind="@todo.IsDone" />
+            <span>@todo.Title</span>
+        </li>
+    }
+</ul>
+
+<input placeholder="Something todo" style="padding: 0.3rem;" @onkeydown="@AddTodo" @bind="newTodo" />
+<button class="btn btn-primary" @onclick="AddTodo">Add Todo</button>
+@if (todos.Count > 0)
+{
+    <button class="btn btn-danger" style="margin-left: 0.3rem;" @onclick="modalConfirmDelete.OpenModalClearTodo">Clean Todo</button>
+}
+
+<div class="modal @modalConfirmDelete.ModalClass" id="confirm-delete-@(modalConfirmDelete.ModalId)" tabindex="1" role="dialog" style="display:@modalConfirmDelete.ModalDisplay">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>Aviso!</h5>
+            </div>
+            <div class="modal-body">
+                <p>Deseja apagar todos os items que adicionou à lista?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" @onclick="CleanTodo">Apagar tudo</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="modalConfirmDelete.CloseModalClearTodo">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (modalConfirmDelete.ShowBackdrop)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    private List<TodoItem> todos = new();
+    private ModalConfirmDelete modalConfirmDelete = new();
+    private string? newTodo;
+
+    private void AddTodo()
+    {
+        if (!string.IsNullOrWhiteSpace(newTodo))
+        {
+            todos.Add(new TodoItem { Title = newTodo });
+            newTodo = string.Empty;
+        }
+    }
+
+    private void CleanTodo()
+    {
+        todos.Clear();
+        modalConfirmDelete.ModalDisplay = "none";
+        modalConfirmDelete.ShowBackdrop = false;
+    }
+}
